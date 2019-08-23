@@ -1,18 +1,10 @@
 function position = Racing(n, m, laps, varargin)
 
-S = struct();
-
-for i = 1:m     
-    name = ['D', num2str(i)];
-    S1 = struct('Position', i, 'TrackPos', 21 - i, 'RacingLine', 1, 'Skill', 1 - i * 0.01, 'Lap', 0, 'Tyre', 1, 'TyreWear', 1, 'LapTime', 0);
-    eval(strcat("S.", 'D', num2str(i), " = S1"));
-end
-
 i = 1;
 
 while i <= length(varargin)
     if varargin{i} == "Tyre"
-        S.D1.Tyre = varargin{i + 1};
+        STyre = varargin{i + 1};
         i = i + 2;
     end
 end
@@ -35,7 +27,7 @@ Wear(Tyre == 3) = 0.8;
 Laptimes = [transpose(1:m), zeros(m, laps)];
 
 
-Test = [transpose(m:-1:1), ones(m, 1), transpose(1:m), transpose(0.99:-0.01:0.8), zeros(m, 1), Wear, Tyre, zeros(m, 1)];
+Test = [transpose(m:-1:1), ones(m, 1), transpose(1:m), 0.99:-0.01:0.8, zeros(m, 1), Wear, Tyre, zeros(m, 1)];
 
 stats = [transpose(1:m), zeros(m, 10000)];
 Position = [transpose(1:m), zeros(m, 10000)];
@@ -46,8 +38,8 @@ while lap < laps
     new_Test = Test;
     dist = 5 * ones(m, 1);
     r = rand(m, 1);
-    dist(r > 0.5) = 4;
-    dist(all([r > 0.5, Test(:, 6) .* Test(:, 4) > 2 * r - 1], 2)) = 6;
+    dist(r > 0.5 && Test(:, 6) .* Test(:, 4) > 2 * r - 1) = 6;
+    dist(Test(:, 6) .* Test(:, 4) < 0.5 * r) = 4;
     
     for j = 1:size(Test, 1)
         [l, v] = ismember([mod((Test(j, 1) + transpose(1:dist(j))), n), Test(j, 2) * ones(dist(j), 1)], [mod(Test(:, 1), n), Test(:, 2)], 'rows');
@@ -210,5 +202,5 @@ end
 legend(string(1:m))
 hold off;
 
-position = Position(1:m, 1:i - 1);
+position = Position(1, end);
 end

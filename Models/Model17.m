@@ -25,8 +25,8 @@ Plot_Vars = Create_plot_vars(Vars);
 % Define the K values. If no reverse reaction occurs, set the second value
 % to zero
 K(1, :) = [10^-3, 10^-2]; % nM^-1s^-1, s^-1
-K(2, :) = [0.1, 1]; % nM^-1s^-1, s^-1
-K(3, :) = [10^-3, 10^-2]; % nM^-1s^-1, s^-1
+K(2, :) = [0.9, 0.1]; % nM^-1s^-1, s^-1
+K(3, :) = [10^-3, 10^-3]; % nM^-1s^-1, s^-1
 K(4, :) = [0.9, 0.1]; % nM^-1s^-1, s^-1
 
 % Define the reactions i.e. {[1, 2],  6,  [1, 2]} means variables 1 and 2

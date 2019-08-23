@@ -24,6 +24,8 @@ Plot_Vars = Create_plot_vars(Vars);
 % to zero
 K(1, :) = [10^-3, 10^-2]; % nM^-1s^-1, s^-1
 
+KD = K(:, 2)./K(:, 1);
+
 % Define the reactions i.e. {[1, 2],  6,  [1, 2]} means variables 1 and 2
 % react to make variable 6 with rate constant K(1) and the reverse reaction 
 % happens with rate constant K(2)

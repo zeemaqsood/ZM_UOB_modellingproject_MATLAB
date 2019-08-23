@@ -21,7 +21,6 @@ varall = "All";
 Points = 't';
 Type = "";
 KDConst = 0;
-KD = K(:, 2)./K(:, 1);
 
 % Check for options
 while h <= length(varargin)
@@ -71,6 +70,8 @@ a = 0;
 % For each model
 for i = 1:length(models)
     Models(models(i), 'N');
+    
+    KD = K(:, 2)./K(:, 1);
     
     % If no variables were specified
     if varall == "All"

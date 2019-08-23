@@ -31,6 +31,8 @@ h = 1;
 Style = 0;
 KDConst = 0;
 T = 0;
+% Allow KD be the reverse reaction rate over the forward reaction rate
+KD = K(:, 2)./K(:, 1);
 
 var = vars2nums(var);
 groups = vars2nums(groups);
@@ -120,8 +122,6 @@ hold on;
 
 for k = 1:length(models)
     Models(models(k), 'N');
-    
-    KD = K(:, 2)./K(:, 1);
     
     for i = 1:n
         % Find the value for the next step

@@ -35,6 +35,8 @@ else
     end
 end
 
+figure();
+
 % Plot the graph using the edge labels
 p = plot(G,'EdgeLabel', EdgeLabels, 'ArrowSize', 12, 'Layout', 'layered', 'NodeLabel', {});
 

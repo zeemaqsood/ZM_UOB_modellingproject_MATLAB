@@ -110,6 +110,9 @@ end
 
 Legend = strings(100, 1);
 h = 1;
+
+figure();
+
 hold on;
 
 % For every model
