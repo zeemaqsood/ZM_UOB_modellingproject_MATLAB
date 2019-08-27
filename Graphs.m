@@ -1,6 +1,6 @@
 function Graphs
 
-global Plot_Vars Vars constants n IVs K;
+global Plot_Vars Vars constants n IVs K K_units units;
 
 % Creates a list of all edges, thick_edges and dotted edges
 [edges, thick_edges, dotted_edges] = create_links;
@@ -24,7 +24,7 @@ if isempty(thick_edges)
 else
     Extra_weight = thick_edges(:, 3);
     
-    for i = 1:size(G.Edges.Weight, 1)        
+    for i = 1:size(G.Edges.Weight, 1)
         mult = unique(Extra_weight(all(thick_edges(:, 1:2) == G.Edges.EndNodes(i, :), 2)));
         
         if ~isempty(mult)
@@ -87,13 +87,15 @@ if ~isempty(constants)
 end
 
 % Display all the initial values in a table
-IV = table(Vars, IVs);
+IV = table(Vars, strcat(num2str(IVs), " ", units, "M"));
+IV.Properties.VariableNames{2} = 'IVs';
 disp(IV);
 
 % Display all the k values in a table
 k_num = strcat("k", num2str(transpose(1:size(K, 1))));
-Forw = K(:, 1);
-Rev = K(:, 2);
+Kays = strcat(string(K), " ", K_units);
+Forw = Kays(:, 1);
+Rev = Kays(:, 2); 
 Ks = table(k_num, Forw, Rev);
 disp(Ks);
 
