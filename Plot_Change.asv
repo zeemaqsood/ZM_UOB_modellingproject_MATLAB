@@ -31,8 +31,6 @@ h = 1;
 Style = 0;
 KDConst = 0;
 T = 0;
-% Allow KD be the reverse reaction rate over the forward reaction rate
-KD = K(:, 2)./K(:, 1);
 
 var = vars2nums(var);
 groups = vars2nums(groups);
@@ -123,6 +121,8 @@ hold on;
 for k = 1:length(models)
     Models(models(k), 'N');
     
+    KD = K(:, 2)./K(:, 1);
+    
     for i = 1:n
         % Find the value for the next step
         v = Points(i);
@@ -184,6 +184,8 @@ for k = 1:length(models)
         % Set the legend name to the group number plus the changing variable
         % name and its value
         if Type == "IV"
+            Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ", Groups, ", ", Plot_Vars(var), "^{IV} = ", num2str(v));
+        elseif Type == "KD"
             Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ", Groups, ", ", Plot_Vars(var), "^{IV} = ", num2str(v));
         else
             Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ",Groups, ", k_{", num2str(b1 * var), "} = ", num2str(v));

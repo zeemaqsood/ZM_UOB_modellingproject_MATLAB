@@ -1,10 +1,11 @@
 function tab = Plot_SS_Change(model, Type, var, Plot, points)
 
+
 Models(model, 'N');
 
 global IVs K Vars Plot_Vars Model_names
 
-Var = eqn_vars_2_nums(var);
+Var = vars2nums(var);
 
 if Type == "IV"
     dummy = IVs(Var);
@@ -34,7 +35,8 @@ for i = 1:length(points)
     div = min(Write_Final_Eqn("Max_Num", Plot), [], 1);
         
     for j = 1:length(Plot)
-        tab(i, j + 1) = eval(strcat("S.", Vars{Plot(j)}))/div(j);
+%         tab(i, j + 1) = eval(strcat("S.", Vars{Plot(j)}))/div(j);
+        tab(i, j + 1) = eval(strcat("S.", Vars{Plot(j)}));
     end
 end
 

@@ -180,5 +180,10 @@ end
 % Add the legend to the plot
 legend(Legend(1:h - 1));
 
+% Add the legend and label the axis
+
+xlabel("Time");
+ylabel("Concentration");
+
 hold off;
 end
