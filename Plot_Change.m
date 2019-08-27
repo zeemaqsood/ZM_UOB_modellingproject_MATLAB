@@ -185,6 +185,8 @@ for k = 1:length(models)
         % name and its value
         if Type == "IV"
             Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ", Groups, ", ", Plot_Vars(var), "^{IV} = ", num2str(v));
+        elseif Type == "KD"
+            Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ",Groups, ", k_d = ", num2str(v));
         else
             Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ",Groups, ", k_{", num2str(b1 * var), "} = ", num2str(v));
         end

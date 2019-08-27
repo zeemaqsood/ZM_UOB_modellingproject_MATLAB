@@ -1,0 +1,13 @@
+Plot(2332, [1,2,3], "Proportion")
+Plot(2332, [1,2,3], Proportion)
+
+Plot(2332, [1,2,3], "Proportion", "T", 100)
+Plot(2332, [1,2,3], Proportion, T, 100)
+
+Plot_Change("IV", 2332, "L", [1,2,3,4,5], 3)
+Plot_Change(IV, 2332, L, [1,2,3,4,5], 3)
+
+Plot_Change("IV", 2332, "R", [1,2,3,4,5], 3)
+Plot_Change(IV, 2332, R, [1,2,3,4,5], 3)
+
+Plot_Change(K, 2331, 1, [0.001, 0.01, 0.1, 1, 10, 100], 3, Proportion)
