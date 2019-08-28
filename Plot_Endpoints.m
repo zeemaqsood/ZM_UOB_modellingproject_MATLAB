@@ -56,7 +56,12 @@ for i = 1:m
 end
 
 % Add the variable names to the legend, and "All" for the sum of them all.
-legend([Groups; "All"]);
+if m >= 2
+    legend([Groups; "All"]);
+else
+    legend(Groups);
+end
+
 title(Model_names(models));
 
 % Don't allow the graph to be added to

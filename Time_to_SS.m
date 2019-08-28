@@ -4,10 +4,10 @@ function a = Time_to_SS(models, varargin)
 %
 % This function finds the time it takes for every model specified, and any
 % variables specified, to reach 99% of the way to its steady state
-% 
+%
 % inputs: models: [1, 2]
 %
-% options: If variables are specified, it will 
+% options: If variables are specified, it will
 %          'Change', if specified, should follow a Type, var and points
 %
 % See also: ODEs, Models, ode15s
@@ -21,6 +21,7 @@ varall = "All";
 Points = 't';
 Type = "";
 KDConst = 0;
+f = false;
 
 % Check for options
 while h <= length(varargin)
@@ -30,8 +31,8 @@ while h <= length(varargin)
         varall = "Some";
         h = h + 1;
         
-    % If an options is change, let var be the second after and Points the 
-    % third after.
+        % If an options is change, let var be the second after and Points the
+        % third after.
     elseif varargin{h} == "Change"
         Type = varargin{h + 1};
         var = varargin{h + 2};
@@ -49,7 +50,7 @@ while h <= length(varargin)
                 b1 = -1;
             end
             
-        elseif varargin{h + 1} == "KD"            
+        elseif varargin{h + 1} == "KD"
             if var > 0
                 b1 = 1;
             else
@@ -61,6 +62,10 @@ while h <= length(varargin)
     elseif varargin{h} == "KDConst"
         KDConst = 1;
         
+        h = h + 1;
+        
+    elseif varargin{h} == "Accurate"
+        f = true;
         h = h + 1;
     end
 end
@@ -80,7 +85,7 @@ for i = 1:length(models)
     
     % For all points available in change, if change was not specified, run
     % this once
-    for j = 1:length(Points)  
+    for j = 1:length(Points)
         % Change the values
         if Type == "IV"
             IVs(var) = Points(j);
@@ -122,16 +127,13 @@ for i = 1:length(models)
                 
                 % If the start and end are the same, assume the variable is
                 % constant and ignore the variable
-                if IVs(vars(k)) == SS_var
+                if SS_var == y(end)
                     T = 0;
-                
+                    
                 % If the distance between the end and the steady state is
                 % smaller than 1% of the start and steady state
-                elseif abs(y(end) - SS_var) <= 0.01 * abs((IVs(vars(k)) - SS_var))
-                    % Find the first value which becomes within the one
-                    % percent range such that after that point no more
-                    % leave that
-                    vec = abs(y - SS_var) <= 0.01 * abs((IVs(vars(k)) - SS_var));
+                elseif abs(y(end) - SS_var) <= 0.01 * max(abs(y - SS_var))
+                    vec = abs(y - SS_var) <= 0.01 * max(abs(y - SS_var));
                     x = length(vec) - find(~vec(end:-1:1), 1) + 2;
                     
                     % Repeat the above for twice the range to see if the
@@ -140,20 +142,29 @@ for i = 1:length(models)
                     y1 = y1(:, vars(k));
                     
                     % Check for whether there exists a point after the one
-                    % found before that is further that 1% from the steady 
+                    % found before that is further that 1% from the steady
                     % state
-                    z = find(abs(y1(t1 >= t(x)) - SS_var) > 0.01 * abs((IVs(vars(k)) - SS_var)), 1);
-                   
+                    z = find(abs(y1(t1 >= t(x)) - SS_var) > 0.01 * max(abs(y - SS_var)), 1);
+                    
                     % If a point exists, move up to the next range
                     if ~isempty(z)
                         T = T * 10;
-                    
-                    % Set a to be the max of what it already is or the
-                    % closest multiple of T/10 up from the value of t(x)
+                        
+                        % Set a to be the max of what it already is or the
+                        % closest multiple of T/10 up from the value of t(x)
                     else
-                        a = max(a, ceil(t(x) * T^-1 * 10)*T/10);
+                        if f
+                            [t1, y1] = ode15s(@ODEs, [0, 2 * T], IVs);
+                            y1 = y1(:, vars(k));
+                            
+                            z = find(abs(y - SS_var) <= 0.01 * max(abs(y - SS_var)), 1);
+                            a = max(a, t1(x));
+                        else
+                            a = max(a, ceil(t(x) * T^-1 * 10)*T/10);
+                        end
                         T = 0;
                     end
+                    
                 else
                     T = T * 10;
                 end

@@ -21,21 +21,25 @@ start_vars = 1:n;
 % If a variables is constant, remove it as the supply of that variable is
 % 'unlimited'
 start_vars = start_vars(~ismember(start_vars, constants));
+accounted = [];
 
 % Produce an array of all start variables, i.e. only variables used to
 % create products
 for j = 1:m
     b = eqns{j};
     if size(b{1}, 2) >= 2
-        start_vars = start_vars(~ismember(start_vars, b{2}));
+        start_vars = start_vars(start_vars ~= b{2});
     end
     
     if size(b{2}, 2) >= 2
-        start_vars = start_vars(~ismember(start_vars, b{1}));
+        start_vars = start_vars(start_vars ~= b{1});
     end
     
-    if size(b{1}, 2) == 1 && size(b{2}, 2) == 1 && all(ismember([b{1}, b{2}], start_vars))
-        start_vars = start_vars(~ismember(start_vars, b{2}));
+    if size(b{1}, 2) == 1 && size(b{2}, 2) == 1 && all(ismember([b{1}, b{2}], [start_vars, accounted]))
+        if all(ismember([b{1}, b{2}], start_vars))
+            start_vars = start_vars(start_vars ~= b{2});
+            accounted = [accounted, b{2}];
+        end
     end
 end
 

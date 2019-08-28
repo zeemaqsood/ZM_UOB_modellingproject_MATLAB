@@ -1,10 +1,10 @@
-function K_units = K_Var_units(units, K_units)
+function K_units = K_Var_units(units, K_unit)
 
 global eqns K catalysts
 
 sizes = ["p", "n", "u", "m", "", "K", "M", "G", "T"];
 
-[~, b] = ismember([units; K_units], sizes);
+[~, b] = ismember([units; K_unit], sizes);
 
 K_units = strings(size(K));
 

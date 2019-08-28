@@ -1,11 +1,11 @@
-function Model_template_new
+function Model18
 
 global Model_names Vars Plot_Vars IVs K K_units units eqns multiples catalysts constants n;
 
-Model_names() = "";
+Model_names(18) = "Delay";
 
 % Number of variables
-n = ;
+n = 3;
 
 Vars = cell(n, 1);
 IVs = zeros(n, 1);
@@ -15,8 +15,12 @@ K_units = strings(n, 1);
 units = ''; % Any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
 
 % Variable names and their initial values
-Vars{1} = ;        IVs(1) = ;      Var_units(1) = ""; % 'L', 1, any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
-Vars{2} = ;        IVs(2) = ;      Var_units(2) = "";
+Vars{1} = 'L';          IVs(1) = 1;              Var_units(1) = "n"; % 'L', 1, any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+Vars{2} = 'R0';         IVs(2) = 6.445 * 10^-3;  Var_units(2) = "n";
+Vars{3} = 'Syk';        IVs(3) = 6.445 * 10^-3;  Var_units(3) = "n";
+Vars{4} = 'L_R0';       IVs(4) = 0;              Var_units(4) = "";
+Vars{5} = 'L_R0_Syk';   IVs(5) = 0;              Var_units(5) = "";
+Vars{6} = 'L_R1_Syk';   IVs(6) = 0;              Var_units(6) = "";
 
 size_change = equiv(units, Var_units);
 
@@ -29,9 +33,11 @@ Plot_Vars = Create_plot_vars(Vars);
 
 % Define the K values. If no reverse reaction occurs, set the second value
 % to zero
-K = zeros(, 2);
+K = zeros(3, 2);
 
-K(1, :) = [, ];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+K(1, :) = [0.1, 0.1];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+K(1, :) = [0.1, 0.1];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+K(1, :) = [0.1, 0,];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
 
 K_units = K_Var_units(units, K_unit);
 
@@ -42,7 +48,9 @@ K_units = K_Var_units(units, K_unit);
 eqns = cell(1, 1);
 
 %            in           out     k value numbers
-eqns{1} = {, , }; % {["R", "LL_R"], "LL_RR", 2}
+eqns{1} = {["L", "R0"], "L_R0", 1}; % {["R", "LL_R"], "LL_RR", 2}
+eqns{2} = {["L_R0", "Syk"], "L_R0_Syk", 2}; % {["R", "LL_R"], "LL_RR", 2}
+eqns{3} = {"L_R0_Syk", "L_R1_Syk", 3}; % {["R", "LL_R"], "LL_RR", 2}
 
 eqns = vars2nums(eqns);
     

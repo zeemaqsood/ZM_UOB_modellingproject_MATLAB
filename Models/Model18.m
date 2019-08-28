@@ -1,23 +1,25 @@
-function Model69
+function Model18
 
 global Model_names Vars Plot_Vars IVs K K_units units eqns multiples catalysts constants n;
 
-Model_names(69) = "Test";
+Model_names(18) = "Delay";
 
 % Number of variables
 n = 3;
 
 Vars = cell(n, 1);
 IVs = zeros(n, 1);
+
 Var_units = strings(n, 1);
-K = zeros(1, 2);
-K_units = strings(n, 1);
-units = 'n';
+units = ''; % Any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
 
 % Variable names and their initial values
-Vars{1} = 'R0';        IVs(1) = 1;                Var_units(1) = "n";
-Vars{2} = 'R1';        IVs(2) = 0;    Var_units(2) = "n";
-Vars{3} = 'R2';      IVs(3) = 0;                Var_units(3) = "n";
+Vars{1} = 'L';          IVs(1) = 1;              Var_units(1) = "n"; % 'L', 1, any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+Vars{2} = 'R0';         IVs(2) = 6.445 * 10^-3;  Var_units(2) = "n";
+Vars{3} = 'Syk';        IVs(3) = 6.445 * 10^-3;  Var_units(3) = "n";
+Vars{4} = 'L_R0';       IVs(4) = 0;              Var_units(4) = "";
+Vars{5} = 'L_R0_Syk';   IVs(5) = 0;              Var_units(5) = "";
+Vars{6} = 'L_R1_Syk';   IVs(6) = 0;              Var_units(6) = "";
 
 size_change = equiv(units, Var_units);
 
@@ -35,32 +37,22 @@ Plot_Vars = Create_plot_vars(Vars);
 eqns = cell(1, 1);
 
 %            in           out     k value numbers
-eqns{1} = {"R0", "R1", 1}; % {["R", "LL_R"], "LL_RR", 2}
-eqns{2} = {"R1", "R2", 1}; % {["R", "LL_R"], "LL_RR", 2}
-eqns{3} = {"R2", "R0", 1}; % {["R", "LL_R"], "LL_RR", 2}
+eqns{1} = {["L", "R0"], "L_R0", 1}; % {["R", "LL_R"], "LL_RR", 2}
+eqns{2} = {["L_R0", "Syk"], "L_R0_Syk", 2}; % {["R", "LL_R"], "LL_RR", 2}
+eqns{3} = {"L_R0_Syk", "L_R1_Syk", 3}; % {["R", "LL_R"], "LL_RR", 2}
 
-eqns = vars2nums(eqns);
-    
+eqns = vars2nums(eqns);   
 
 % Define the K values. If no reverse reaction occurs, set the second value
 % to zero
-K(1, :) = [1, 0];  K_units = "n";
+K = zeros(3, 2);
+K_units = strings(3, 1);
 
-K_units = K_Var_units(units, K_units);
+K(1, :) = [0.1, 0.1];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+K(2, :) = [0.1, 0.1];  K_unit(2) = ""; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+K(3, :) = [0.1, 0.1];  K_unit(3) = ""; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
 
-% Define the reactions i.e. {[1, 2],  6,  [1, 2]} means variables 1 and 2
-% react to make variable 6 with rate constant K(1) and the reverse reaction 
-% happens with rate constant K(2)
-
-eqns = cell(1, 1);
-
-%            in           out     k value numbers
-eqns{1} = {"R0", "R1", 1}; % {["R", "LL_R"], "LL_RR", 2}
-eqns{2} = {"R1", "R2", 1}; % {["R", "LL_R"], "LL_RR", 2}
-eqns{3} = {"R2", "R0", 1}; % {["R", "LL_R"], "LL_RR", 2}
-
-eqns = vars2nums(eqns);
-    
+K_units = K_Var_units(units, K_unit);
 
 % Reactions which have multiple possibilities
 multiples = cell(1, 2);
@@ -86,6 +78,6 @@ catalysts{2} = vars2nums(catalysts{2});
       
 
 % Variables which we assume to stay constant
-constants = vars2nums([]); % [1, 2]
+constants = vars2nums(1); % [1, 2]
     
 end

@@ -1,6 +1,6 @@
 function Model11
 
-global Model_names Vars Plot_Vars IVs K KD eqns multiples catalysts constants n;
+global Model_names Vars Plot_Vars IVs K eqns multiples catalysts constants n;
 
 Model_names(11) = "Single L, mouse";
 
