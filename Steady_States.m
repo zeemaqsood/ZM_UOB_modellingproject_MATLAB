@@ -27,9 +27,6 @@ end
 
 S = solve(eqns, Vars, 'ReturnConditions', true);
 
-
-
-
 for i = 1:size(Vars, 1)
     eval(strcat("S." , Vars(i), " = eval(", strcat("vpa(S.", Vars(i), ")"), ");"));
 end

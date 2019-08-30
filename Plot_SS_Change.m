@@ -73,7 +73,6 @@ figure();
 
 hold on;
 
-
 SS = zeros(length(Points), length(groups) + 1, length(models));
 
 for k = 1:length(models)
@@ -156,8 +155,10 @@ legend(Legend);
 
 if Type == "IV"
     xlabel(strcat("Initial value of ", Plot_Vars(var)));
+    
 elseif Type == "KD"
     xlabel(strcat("k_d value"));
+    
 else
     xlabel(strcat("k_{", num2str(b1 * Var), "} value"));
 end

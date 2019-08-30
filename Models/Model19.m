@@ -1,8 +1,8 @@
-function Model18
+function Model19
 
 global Model_names Vars Plot_Vars IVs K K_units units eqns multiples catalysts constants n;
 
-Model_names(18) = "Delay";
+Model_names(19) = "Delay";
 
 % Number of variables
 n = 6;
@@ -68,11 +68,11 @@ multiples{2} = zeros(0, 1);
 catalysts = cell(1, 2);
 
 % How many catlysts occur?
-catalysts{1} = zeros(0, 1);
-catalysts{2} = cell(0, 1);
+catalysts{1} = zeros(1, 1);
+catalysts{2} = cell(1, 1);
 
 %                 Eqn number            Var
-% catalysts{1}(1) = 3; catalysts{2}{1} = "L_R0_Syk"; % 1, "LL"
+catalysts{1}(1) = 3; catalysts{2}{1} = "L_R0_Syk"; % 1, "LL"
 
 catalysts{2} = vars2nums(catalysts{2});
       
