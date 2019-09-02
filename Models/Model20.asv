@@ -13,7 +13,7 @@ IVs = zeros(n, 1);
 Var_unit = strings(n, 1);
 
 % Variable names and their initial values
-Vars{1} = 'L';          IVs(1) = 1000;            Var_unit(1) = "n"; % 'L', 1, any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+Vars{1} = 'L';          IVs(1) = 100;            Var_unit(1) = ""; % 'L', 1, any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
 Vars{2} = 'R0';         IVs(2) = 6.445 * 10^-3;  Var_unit(2) = "n";
 Vars{3} = 'L_R0';       IVs(3) = 0;              Var_unit(3) = "n";
 
@@ -41,9 +41,9 @@ eqns = vars2nums(eqns);
 % to zero
 K = zeros(1, 2);
 K_unit = strings(1, 1);
-T_unit = "M";
+T_unit = "";
 
-K(1, :) = [1, 10000];  K_unit(1) = "p"; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+K(1, :) = [10^-3, 10^-2];  K_unit(1) = "n"; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
 
 % Reactions which have multiple possibilities
 multiples = cell(1, 2);

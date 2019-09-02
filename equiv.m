@@ -1,12 +1,16 @@
-function size_change = equiv(units, Var_units)
+function [IVs, units] = equiv(IVs, Var_units)
 
-sizes = ["p", "n", "u", "m", "", "K", "M", "G", "T"];
+sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
 
- [~, b] = ismember([units; Var_units], sizes);
+[~, b] = ismember(Var_units, sizes);
 
-size_change = zeros(size(Var_units));
+b = b - 9;
 
-for i = 1:length(Var_units)
-    size_change(i) = 10^(3 * (b(i + 1) - b(1)));
-end
+Log = floor(log10(IVs .* 10 .^ (3 * b))/3);
+
+m = min(Log(Log ~= - Inf));
+units = sizes(m + 9);
+
+IVs = IVs .* 10 .^ (3 .* (b - m));
+
 end

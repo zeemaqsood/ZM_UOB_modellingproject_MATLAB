@@ -22,7 +22,11 @@ function Plot(varargin)
 %
 % Author: Sean Watson  Date: 06/08/2019  Version: v0.1
 
-global IVs Model_names Plot_Vars Vars
+sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
+
+global IVs Model_names Plot_Vars Vars units T_units
+
+m = 0;
 
 % If the first input is not a cell, it must contain all the models we wish
 % to plot, otherwise it must be a cell of models and variables
@@ -41,9 +45,11 @@ if ~iscell(varargin{1})
             % cell
             if iscell(varargin{2})
                 a = [a, {{varargin{1}(i), varargin{2}}}];
+                m = m + length(varargin{2});
                 
             else
                 a = [a, {{varargin{1}(i), num2cell(varargin{2})}}];
+                m = m + length(varargin{2});
             end
         end
         h = 3;
@@ -60,6 +66,9 @@ else
     for i = 1:length(a)
         if ~iscell(a{i}{2})
             a{i}{2} = num2cell(a{i}{2});
+            m = m + length(a{i}{2});
+        else
+            m = m + length(a{i}{2});
         end
     end
     h = 2;
@@ -72,7 +81,15 @@ while h <= length(varargin)
     % If there is an option "T", T to the next input
     if varargin{h} == "T"
         T = varargin{h + 1};
-        h = h + 2;
+        
+        if ismember(varargin{h + 1}, sizes)
+            T_unit = varargin{h + 2};
+            h = h + 3;
+            
+        else
+            T_unit = "";
+            h = h + 2;
+        end
         
     % If there is an option "Proportion", let Style be set to 1
     elseif varargin{h} == "Proportion"
@@ -96,20 +113,26 @@ end
 % If no time is stated, find the time to plot by finding when all variables
 % of all models are close to its steady state.
 if T == 0
-    if iscell(a)
-        for i = 1:length(a)
-            Models(a{i}{1}, 'N');
-            
-            T = max(T, Time_to_SS(a{i}{1}, cell2mat(vars2nums(a{i}{2}))));
-        end
-    else
+    b = inf;
+    
+    for i = 1:length(a)
+        Models(a{i}{1}, 'N');
+
+        [new_T, T_unit] = Time_to_SS(a{i}{1}, cell2mat(vars2nums(a{i}{2})));
+        T = max(T, new_T);
         
-        T = Time_to_SS(a);
+        [~, new_b] = ismember(T_unit, sizes);
+        b = min(b, new_b);
     end
+    
+    T_unit = sizes(b);
 end
 
 Legend = strings(100, 1);
 h = 1;
+
+plots = zeros(100, m + 1, length(a));
+uns = strings(length(a), 1);
 
 figure();
 
@@ -147,8 +170,11 @@ for i = 1:length(a)
         Model_name = Model_names(a(i));
     end
     
+    [~, b] = ismember([T_units, T_unit], sizes);
+    
     % Run the model using ode15s
-    [t, y] = ode15s(@ODEs, [0, T], IVs);
+    [t, y] = ode15s(@ODEs, [0, T * 10 ^ (3 * (b(2) - b(1)))], IVs);
+    plots(1:length(t), 1, i) = t * 10 ^ (3 * (b(1) - b(2)));
     
     % For each group we want to plot
     for j = 1:length(groups)
@@ -169,12 +195,37 @@ for i = 1:length(a)
         end
         
         % Plot the group
-        plot(t, sum(y(:, groups{j}), 2))
+        plots(1:length(t), j + 1, i) = sum(y(:, groups{j}), 2);
         
         % Add the model and group to the legend
         Legend(h) = strcat("Model ", Model_name, ", var ", Groups(j));
         h = h + 1;
     end
+    
+    plots(length(t) + 1:end, :, i) = NaN;
+    plots(:, length(groups) + 2:end, i) = NaN;
+    
+    uns(i) = units;
+end
+
+if Style == 0
+    [~, b] = ismember(uns, sizes);
+
+    v = max(max(plots(:, 2:end, :)));
+    
+    m = min(v(:) .* 10 .^ (3 * (b - 9)));
+
+    Log = floor(log10(m)/3);
+    
+    for i = 1:length(b)
+        plots(:, 2:end, i) = plots(:, 2:end, i) .* 10 ^ (3 * ((b(i) - 9) - Log));
+    end
+
+    unit = sizes(9 + Log);
+end
+
+for i = 1:length(a)
+    plot(plots(:, 1, i), plots(:, 2:end, i));
 end
 
 % Add the legend to the plot
@@ -182,8 +233,8 @@ legend(Legend(1:h - 1));
 
 % Add the legend and label the axis
 
-xlabel("Time");
-ylabel("Concentration");
+xlabel(strcat("Time, ", T_unit, "s"));
+ylabel(strcat("Concentration, ", unit, "M"));
 
 hold off;
 end

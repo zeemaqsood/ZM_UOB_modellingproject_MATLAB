@@ -25,7 +25,9 @@ function endpoints = Plot_Change(Type, models, var, Points, groups, varargin)
 %
 % Author: Sean Watson  Date: 06/08/2019  Version: v0.1
 
-global IVs K Plot_Vars Model_names;
+sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
+
+global IVs K Plot_Vars Model_names units T_units K_units;
 
 h = 1;
 Style = 0;
@@ -40,7 +42,19 @@ while h <= length(varargin)
     % If there is an option "T", T to the next input
     if varargin{h} == "T"
         T = varargin{h + 1};
-        h = h + 2;
+        
+        if ismember(varargin{h + 1}, sizes)
+            T_unit = varargin{h + 2};
+            h = h + 3;
+            
+        else
+            T_unit = "";
+            h = h + 2;
+        end
+        
+    elseif ismember(varargin{h}, sizes)
+        var_unit = varargin{h};
+        h = h + 1;        
         
     % If there is an option "Proportion", let Style be set to 1
     elseif varargin{h} == "Proportion"
@@ -69,10 +83,14 @@ end
 % If the time is not specified, find the time to show all plots
 if T == 0
     if KDConst == 0
-        T = Time_to_SS(models, "Change", Type, var, Points);
+        [T, T_unit] = Time_to_SS(models, "Change", Type, var, Points);
     else
-        T = Time_to_SS(models, "Change", Type, var, Points, "KDConst");
+        
+        [T, T_unit] = Time_to_SS(models, "Change", Type, var, Points, "KDConst");
     end
+    
+[~, b] = ismember(T_unit, sizes);
+T_unit = sizes(b);
 end
 
 var = vars2nums(var);
@@ -84,6 +102,7 @@ if ismember(Type, ["K", "KD"])
     if var > 0
         b1 = 1;
     else
+        
         var = - var;
         b1 = -1;
     end
@@ -102,6 +121,7 @@ n = length(Points);
 Groups = strings(m, 1);
 for i = 1:m
     Groups(i) = Plot_Vars(groups{i}(1));
+    
     for j = 2:length(groups{i})
         Groups(i) = strcat(Groups(i), " + ", Plot_Vars(groups{i}(j)));
     end
@@ -112,11 +132,14 @@ Legend = strings(n * m * length(models), 1);
 
 % Allow endpoints to be of the size, the number of plot variables by the
 % number of steps
-endpoints = zeros(n, m + 1, length(models));
+endpoints = zeros(n, m + 1, length(Points), length(models));
 
 figure();
 
 hold on;
+
+plots = zeros(100, length(groups), length(models));
+uns = strings(length(models), 1);
 
 for k = 1:length(models)
     Models(models(k), 'N');
@@ -129,6 +152,11 @@ for k = 1:length(models)
         
         % Set the initial value to the value of this step
         if Type == "IV"
+            if exist('var_unit', 'var')
+                [~, b] = ismember([var_unit; units], sizes);
+                v = v * 10 ^ (3 * (b(1) - b(2)));
+            end
+            
             IVs(var) = v;
             
         elseif Type == "K"
@@ -155,8 +183,11 @@ for k = 1:length(models)
             end
         end
         
+        [~, b] = ismember([T_units, T_unit], sizes);
+        
         % Simulate the model using ode15s
-        [t, y] = ode15s(@ODEs, [0, T], IVs);
+        [t, y] = ode15s(@ODEs, [0, T * 10 ^ (3 * (b(2) - b(1)))], IVs);
+        plots(1:length(t), 1, i, k) = t * 10 ^ (3 * (b(1) - b(2)));
         
         % Set the first column of endpoints to be the changing variable
         endpoints(i, 1, k) = v;
@@ -174,30 +205,58 @@ for k = 1:length(models)
 
                 y(:, groups{j}) = mult .* y(:, groups{j});
            end
+           
+           plots(1:length(t), j + 1, i, k) = sum(y(:, groups{j}), 2);
             
-            plot(t, sum(y(:, groups{j}), 2));
-            
-            % Set the endpoints of the lines to the sum of the array endpoints
-            endpoints(i, j + 1, k) = sum(y(end, groups{j}));
+           % Set the endpoints of the lines to the sum of the array endpoints
+           endpoints(i, j + 1, k) = sum(y(end, groups{j}));
         end
         
         % Set the legend name to the group number plus the changing variable
         % name and its value
         if Type == "IV"
-            Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ", Groups, ", ", Plot_Vars(var), "^{IV} = ", num2str(v));
+            Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ", Groups, ", ", Plot_Vars(var), "^{IV} = ", num2str(v), ", ", units, "M");
+       
         elseif Type == "KD"
             Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ",Groups, ", k_d = ", num2str(v));
+        
         else
-            Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ",Groups, ", k_{", num2str(b1 * var), "} = ", num2str(v));
+            Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ",Groups, ", k_{", num2str(b1 * var), "} = ", num2str(v), ", ", K_units(var, 0.5 * (3 - b1)));
         end
+        
+        plots(length(t) + 1:end, :, i, k) = NaN;
+    end
+        
+    uns(k) = units;
+end
+
+if Style == 0
+    [~, b] = ismember(uns, sizes);
+
+    v = max(max(plots(:, 2:end, :)));
+    
+    m = min(v(:) .* 10 .^ (3 * (b - 9)));
+
+    Log = floor(log10(m)/3);
+    
+    for i = 1:length(b)
+        plots(:, 2:end, i) = plots(:, 2:end, i) .* 10 ^ (3 * ((b(i) - 9) - Log));
+    end
+
+    unit = sizes(9 + Log);
+end
+
+for k = 1:length(models)
+    for i = 1:n
+        plot(plots(:, 1, i, k), plots(:, 2:end, i, k));
     end
 end
 
 % Add the legend and label the axis
 legend(Legend);
-xlabel("Time");
-ylabel("Concentration");
-title(Model_names(models));
+xlabel(strcat("Time, ", T_unit, "s"));
+ylabel(strcat("Concentration, ", unit, "M"));
+% title(Model_names(models));
 
 % Allow no more lines to be added to the plot
 hold off;

@@ -1,4 +1,4 @@
-function a = Time_to_SS(models, varargin)
+function [a, T_unit] = Time_to_SS(models, varargin)
 
 % Time_to_SS:
 %
@@ -14,7 +14,9 @@ function a = Time_to_SS(models, varargin)
 %
 % Author: Sean Watson  Date: 06/08/2019  Version: v0.1
 
-global Vars IVs K;
+sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
+
+global Vars IVs K T_units;
 
 h = 1;
 varall = "All";
@@ -153,14 +155,17 @@ for i = 1:length(models)
                         % Set a to be the max of what it already is or the
                         % closest multiple of T/10 up from the value of t(x)
                     else
+                        [t1, y1] = ode15s(@ODEs, [0, t(x)], IVs);
+                        y1 = y1(:, vars(k));
+                        vec = abs(y - SS_var) <= 0.01 * max(abs(y - SS_var));
+                        x = length(vec) - find(~vec(end:-1:1), 1) + 2;
+                        
+                        [~, b] = ismember(T_units, sizes);
+                        
                         if f
-                            [t1, y1] = ode15s(@ODEs, [0, 2 * T], IVs);
-                            y1 = y1(:, vars(k));
-                            
-                            z = find(abs(y - SS_var) <= 0.01 * max(abs(y - SS_var)), 1);
-                            a = max(a, t1(x));
+                            a = max(a, t1(x) * 10^(3 * (b - 9)));
                         else
-                            a = max(a, ceil(t(x) * T^-1 * 10)*T/10);
+                            a = max(a, floor(t(x)*10^(-floor(log10(t(x)))))*10^(floor(log10(t(x)))) * 10^(3 * (b - 9)));
                         end
                         T = 0;
                     end
@@ -172,4 +177,8 @@ for i = 1:length(models)
         end
     end
 end
+
+Log = floor(log10(a)/3);
+T_unit = sizes(Log + 9);
+a = a * 10 ^ (- 3 * Log);
 end
