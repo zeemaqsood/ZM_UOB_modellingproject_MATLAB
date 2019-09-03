@@ -6,7 +6,7 @@ end
 
 dydt = Write_Eqns("Stable");
 
-global Vars;
+global Vars units;
 
 n = size(Vars, 1);
 
@@ -30,4 +30,12 @@ S = solve(eqns, Vars, 'ReturnConditions', true);
 for i = 1:size(Vars, 1)
     eval(strcat("S." , Vars(i), " = eval(", strcat("vpa(S.", Vars(i), ")"), ");"));
 end
+
+SS = strings(length(Vars), 1);
+
+for i = 1:size(Vars, 1)
+    SS(i) = strcat(num2str(eval(strcat("S." , Vars(i)))), " ", units, "M");
+end
+
+T = table(SS);
 end

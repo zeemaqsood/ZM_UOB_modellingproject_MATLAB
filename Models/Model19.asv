@@ -1,4 +1,4 @@
-function Model20
+function Model19
 
 global Model_names Vars Plot_Vars IVs K K_units T_units units eqns multiples catalysts constants n;
 
@@ -9,15 +9,16 @@ n = 3;
 
 Vars = cell(n, 1);
 IVs = zeros(n, 1);
+units = "n";
 
 Var_unit = strings(n, 1);
 
 % Variable names and their initial values
-Vars{1} = 'L';          IVs(1) = 100;            Var_unit(1) = ""; % 'L', 1, any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+Vars{1} = 'L';          IVs(1) = 1000;           Var_unit(1) = "n"; % 'L', 1, any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
 Vars{2} = 'R0';         IVs(2) = 6.445 * 10^-3;  Var_unit(2) = "n";
 Vars{3} = 'L_R0';       IVs(3) = 0;              Var_unit(3) = "n";
 
-[IVs, units] = equiv(IVs, Var_unit);
+IVs = equiv(IVs, Var_unit, units);
 
 % Formal variable names displayed when used to plot graphs. If you would
 % like to change any, do so here

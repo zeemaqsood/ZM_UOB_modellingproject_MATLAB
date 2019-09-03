@@ -1,6 +1,8 @@
 function SS = Plot_SS_Change(Type, models, var, Points, groups, varargin)
 
-global IVs K Vars Plot_Vars Model_names
+sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
+
+global IVs K Vars Plot_Vars Model_names unit K_units T_unit
 
 h = 1;
 Style = 0;
@@ -12,7 +14,12 @@ groups = vars2nums(groups);
 % Check the options
 while h <= length(varargin)
     % If there is an option "Proportion", let Style be set to 1
-    if varargin{h} == "Proportion"
+    if ismember(varargin{h}, sizes)
+        var_unit = varargin{h};
+            
+        h = h + 1;        
+    
+    elseif varargin{h} == "Proportion"
         Style = 1;
         h = h + 1;
         
@@ -74,15 +81,32 @@ figure();
 hold on;
 
 SS = zeros(length(Points), length(groups) + 1, length(models));
+uns = strings(1, length(groups), length(models));
 
 for k = 1:length(models)
     Models(models(k), 'N');
     
     KD = K(:, 2)./K(:, 1);
     
+    if exist('var_unit', 'var')
+        if Type == "IV"
+            Points_new = equiv(Points, var_unit, unit);
+            
+        elseif Type == "K"
+            Points_new = equiv(Points, var_unit, unit, K_units);
+            var_unit = varargin{h};
+
+        elseif Type == "KD"
+            K_un = K_units(:, 2) - K_units(:, 1);            
+            Points_new = equiv(Points, var_unit, unit, K_un);
+        end 
+    else
+        Points_new = Points;
+    end
+    
     for i = 1:n
         % Find the value for the next step
-        v = Points(i);
+        v = Points_new(i);
         
         % Set the initial value to the value of this step
         if Type == "IV"
@@ -146,22 +170,50 @@ for k = 1:length(models)
         end
     end
     
-    plot(SS(:, 1, k), SS(:, 2:end, k));    
+    uns(1, :, k) = unit;
     
     Legend((k - 1) * m + 1:k * m) = strcat(Model_names(models(k)), ", ", Groups);
 end
 
-legend(Legend);
+if Style == 0
+    [~, b] = ismember(uns, sizes);
 
-if Type == "IV"
-    xlabel(strcat("Initial value of ", Plot_Vars(var)));
+    v = max(max(SS(:, 2:end, :).* 10 .^ (3 * (b - 9))));
     
-elseif Type == "KD"
-    xlabel(strcat("k_d value"));
+    m = min(v(:));
+
+    Log = floor(log10(m)/3);
     
-else
-    xlabel(strcat("k_{", num2str(b1 * Var), "} value"));
+    units = sizes(9 + Log);
+    
+    SS(:, 2:end, :) = equiv(SS(:, 2:end, :), uns, units);
 end
 
-ylabel("Concentration");
+for i = 1:length(models)
+    plot(SS(:, 1, i), SS(:, 2:end, i));
+end
+
+legend(Legend);
+
+if ~exist('var_unit', 'var')
+    var_unit = unit;
+end
+
+if Type == "IV"
+    xlabel(strcat("Initial value of ", Plot_Vars(var), ", ", var_unit, "M"));
+    
+elseif Type == "KD"
+    K_uns = K_units(Var, 2) - K_units(Var, 1);
+    xlabel(strcat("k_d value, ", var_unit, "M^{", num2str(K_uns), "}"));
+    
+else
+    if K_units(Var, 0.5 * (2 - b1)) == 0
+        xlabel(strcat("k_{", num2str(b1 * Var), "} value, ", T_unit, "s^{-1}"));
+    
+    else
+        xlabel(strcat("k_{", num2str(b1 * Var), "} value, ", var_unit, "M^{", num2str(K_units(Var, 0.5 * (2 - b1))), "}", T_unit, "s^{-1}"));
+    end
+end       
+
+ylabel(strcat("Concentration, ", units, "M"));
 end

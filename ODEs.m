@@ -10,7 +10,12 @@ function dydt = ODEs(t, v)
 %
 % Author: Sean Watson  Date: 06/08/2019  Version: v0.1
 
-global K Vars eqns multiples constants catalysts;
+global K Vars eqns multiples constants catalysts unit K_unit K_units;
+
+units = strings(size(K));
+units(:) = K_unit;
+
+Ks = equiv(K, units, unit, K_units);
 
 % let n be the number of variables and m the number of equations
 n = size(Vars, 1);
@@ -32,7 +37,7 @@ for i = 1:m
     n2 = size(b{2}, 2);
     
     % Define which k value we are working with
-    dum1 = K(b{3}(1), 1);
+    dum1 = Ks(b{3}(1), 1);
     
     % Multiply by any variables in the start of the reaction
     for j = 1:n1
@@ -57,7 +62,7 @@ for i = 1:m
     end
     
     % Repeat for the reverse reaction
-    dum2 = K(b{3}(1), 2);
+    dum2 = Ks(b{3}(1), 2);
     
     for k = 1:n2
         dum2 = dum2 * v(b{2}(k));

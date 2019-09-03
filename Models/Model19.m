@@ -1,6 +1,6 @@
 function Model19
 
-global Model_names Vars Plot_Vars IVs K K_units T_units units eqns multiples catalysts constants n;
+global Model_names Vars Plot_Vars IVs K K_units K_unit T_unit unit eqns multiples catalysts constants n;
 
 Model_names(19) = "Delay";
 
@@ -9,6 +9,7 @@ n = 3;
 
 Vars = cell(n, 1);
 IVs = zeros(n, 1);
+unit = "n";
 
 Var_unit = strings(n, 1);
 
@@ -17,7 +18,7 @@ Vars{1} = 'L';          IVs(1) = 1000;           Var_unit(1) = "n"; % 'L', 1, an
 Vars{2} = 'R0';         IVs(2) = 6.445 * 10^-3;  Var_unit(2) = "n";
 Vars{3} = 'L_R0';       IVs(3) = 0;              Var_unit(3) = "n";
 
-[IVs, units] = equiv(IVs, Var_unit);
+IVs = equiv(IVs, Var_unit, unit);
 
 % Formal variable names displayed when used to plot graphs. If you would
 % like to change any, do so here
@@ -40,10 +41,10 @@ eqns = vars2nums(eqns);
 % Define the K values. If no reverse reaction occurs, set the second value
 % to zero
 K = zeros(1, 2);
-K_unit = strings(1, 1);
+K_unit = "n"; % any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
 T_unit = "";
 
-K(1, :) = [10^-3, 10^-2];  K_unit(1) = "n"; % [0.1, 0.1], any of the following ["p", "n", "u", "m", "", "K", "M", "G", "T"]
+K(1, :) = [10^-3, 10^-2];
 
 % Reactions which have multiple possibilities
 multiples = cell(1, 2);
@@ -67,7 +68,7 @@ catalysts{2} = cell(0, 1);
 
 catalysts{2} = vars2nums(catalysts{2});
   
-[K_units, T_units] = K_Var_units(units, K_unit, T_unit);
+K_units = K_Var_units;
 
 % Variables which we assume to stay constant
 constants = vars2nums(1); % [1, 2]

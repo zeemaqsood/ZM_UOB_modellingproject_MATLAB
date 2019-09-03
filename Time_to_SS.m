@@ -1,4 +1,4 @@
-function [a, T_unit] = Time_to_SS(models, varargin)
+function [a, T_un] = Time_to_SS(models, varargin)
 
 % Time_to_SS:
 %
@@ -16,7 +16,7 @@ function [a, T_unit] = Time_to_SS(models, varargin)
 
 sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
 
-global Vars IVs K T_units;
+global Vars IVs K T_unit;
 
 h = 1;
 varall = "All";
@@ -132,8 +132,8 @@ for i = 1:length(models)
                 if SS_var == y(end)
                     T = 0;
                     
-                % If the distance between the end and the steady state is
-                % smaller than 1% of the start and steady state
+                    % If the distance between the end and the steady state is
+                    % smaller than 1% of the start and steady state
                 elseif abs(y(end) - SS_var) <= 0.01 * max(abs(y - SS_var))
                     vec = abs(y - SS_var) <= 0.01 * max(abs(y - SS_var));
                     x = length(vec) - find(~vec(end:-1:1), 1) + 2;
@@ -160,12 +160,12 @@ for i = 1:length(models)
                         vec = abs(y - SS_var) <= 0.01 * max(abs(y - SS_var));
                         x = length(vec) - find(~vec(end:-1:1), 1) + 2;
                         
-                        [~, b] = ismember(T_units, sizes);
+                        [~, b] = ismember(T_unit, sizes);
                         
                         if f
                             a = max(a, t1(x) * 10^(3 * (b - 9)));
                         else
-                            a = max(a, floor(t(x)*10^(-floor(log10(t(x)))))*10^(floor(log10(t(x)))) * 10^(3 * (b - 9)));
+                            a = max(a, floor(t1(x) * 10^(-floor(log10(t1(x))))) * 10^(floor(log10(t1(x)))) * 10^(3 * (b - 9)));
                         end
                         T = 0;
                     end
@@ -179,6 +179,6 @@ for i = 1:length(models)
 end
 
 Log = floor(log10(a)/3);
-T_unit = sizes(Log + 9);
+T_un = sizes(Log + 9);
 a = a * 10 ^ (- 3 * Log);
 end

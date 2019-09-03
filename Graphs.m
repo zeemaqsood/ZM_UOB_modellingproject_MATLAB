@@ -1,6 +1,8 @@
 function Graphs
 
-global Plot_Vars Vars constants n IVs K K_units units;
+sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
+
+global Plot_Vars Vars constants n IVs K K_unit K_units unit T_unit;
 
 % Creates a list of all edges, thick_edges and dotted edges
 [edges, thick_edges, dotted_edges] = create_links;
@@ -87,17 +89,22 @@ if ~isempty(constants)
 end
 
 % Display all the initial values in a table
-IV = table(Vars, strcat(num2str(IVs), " ", units, "M"));
+IV = table(Vars, strcat(num2str(IVs), " ", unit, "M"));
 IV.Properties.VariableNames{2} = 'IVs';
 disp(IV);
 
 % Display all the k values in a table
 k_num = strcat("k", num2str(transpose(1:size(K, 1))));
-Kays = strcat(string(K), " ", K_units);
+
+[~, b] = ismember(T_unit, sizes);
+Ks = K .* 10 .^ (3 .* (9 - b));
+
+Kays = strcat(string(Ks), " ", K_unit, "M^{", string(K_units), "}s^{-1}");
+Kays(K_units == 0) = strcat(string(Ks(K_units == 0)), " ", T_unit, "s^{-1}");
 Forw = Kays(:, 1);
-Rev = Kays(:, 2); 
-Ks = table(k_num, Forw, Rev);
-disp(Ks);
+Rev = Kays(:, 2);
+T = table(k_num, Forw, Rev);
+disp(T);
 
 % Display the ODE's in a table
 Eqns = Write_Eqns;

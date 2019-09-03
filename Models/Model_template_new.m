@@ -65,7 +65,7 @@ catalysts{2} = cell(, 1);
 
 catalysts{2} = vars2nums(catalysts{2});
 
-[K_units, T_units] = K_Var_units(units, K_unit, T_unit);      
+[K_units, T_units] = K_Var_units(units, K_unit, T_unit);
 
 % Variables which we assume to stay constant
 constants = vars2nums(); % [1, 2]

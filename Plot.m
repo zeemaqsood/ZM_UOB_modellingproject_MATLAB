@@ -24,7 +24,7 @@ function Plot(varargin)
 
 sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
 
-global IVs Model_names Plot_Vars Vars units T_units
+global IVs Model_names Plot_Vars Vars unit T_unit
 
 m = 0;
 
@@ -82,12 +82,12 @@ while h <= length(varargin)
     if varargin{h} == "T"
         T = varargin{h + 1};
         
-        if ismember(varargin{h + 1}, sizes)
-            T_unit = varargin{h + 2};
+        if h + 2 <= length(varargin) && ismember(varargin{h + 2}, sizes)
+            T_uns = varargin{h + 2};
             h = h + 3;
             
         else
-            T_unit = "";
+            T_uns = "";
             h = h + 2;
         end
         
@@ -115,24 +115,36 @@ end
 if T == 0
     b = inf;
     
-    for i = 1:length(a)
-        Models(a{i}{1}, 'N');
+    if iscell(a)
+        for i = 1:length(a)
+            Models(a{i}{1}, 'N');
 
-        [new_T, T_unit] = Time_to_SS(a{i}{1}, cell2mat(vars2nums(a{i}{2})));
-        T = max(T, new_T);
-        
-        [~, new_b] = ismember(T_unit, sizes);
-        b = min(b, new_b);
+            [new_T, T_uns] = Time_to_SS(a{i}{1}, cell2mat(vars2nums(a{i}{2})));
+            T = max(T, new_T);
+
+            [~, new_b] = ismember(T_uns, sizes);
+            b = min(b, new_b);
+        end
+    else
+        for i = 1:length(a)
+            Models(a(i), 'N');
+
+            [new_T, T_uns] = Time_to_SS(a(i));
+            T = max(T, new_T);
+
+            [~, new_b] = ismember(T_uns, sizes);
+            b = min(b, new_b);
+        end
     end
     
-    T_unit = sizes(b);
+    T_uns = sizes(b);
 end
 
 Legend = strings(100, 1);
 h = 1;
 
 plots = zeros(100, m + 1, length(a));
-uns = strings(length(a), 1);
+uns = strings(1, m, length(a));
 
 figure();
 
@@ -170,11 +182,11 @@ for i = 1:length(a)
         Model_name = Model_names(a(i));
     end
     
-    [~, b] = ismember([T_units, T_unit], sizes);
+    T_new = equiv(T, T_uns, T_unit);
     
     % Run the model using ode15s
-    [t, y] = ode15s(@ODEs, [0, T * 10 ^ (3 * (b(2) - b(1)))], IVs);
-    plots(1:length(t), 1, i) = t * 10 ^ (3 * (b(1) - b(2)));
+    [t, y] = ode15s(@ODEs, [0, T_new], IVs);
+    plots(1:length(t), 1, i) = equiv(t, T_unit, T_uns);
     
     % For each group we want to plot
     for j = 1:length(groups)
@@ -205,23 +217,21 @@ for i = 1:length(a)
     plots(length(t) + 1:end, :, i) = NaN;
     plots(:, length(groups) + 2:end, i) = NaN;
     
-    uns(i) = units;
+    uns(1, :, i) = unit;
 end
 
 if Style == 0
     [~, b] = ismember(uns, sizes);
 
-    v = max(max(plots(:, 2:end, :)));
+    v = max(max(plots(:, 2:end, :).* 10 .^ (3 * (b - 9))));
     
-    m = min(v(:) .* 10 .^ (3 * (b - 9)));
+    m = min(v(:));
 
     Log = floor(log10(m)/3);
     
-    for i = 1:length(b)
-        plots(:, 2:end, i) = plots(:, 2:end, i) .* 10 ^ (3 * ((b(i) - 9) - Log));
-    end
-
-    unit = sizes(9 + Log);
+    units = sizes(9 + Log);
+    
+    plots(:, 2:end, :) = equiv(plots(:, 2:end, :), uns, units);
 end
 
 for i = 1:length(a)
@@ -233,8 +243,17 @@ legend(Legend(1:h - 1));
 
 % Add the legend and label the axis
 
+
 xlabel(strcat("Time, ", T_unit, "s"));
-ylabel(strcat("Concentration, ", unit, "M"));
+if Style == 0
+    ylabel(strcat("Concentration, ", units, "M"));
+
+elseif Style == 1
+    ylabel("Proportion");
+
+elseif Style == 2
+    ylabel(strcat("Counting variable ", Vars(Count)));
+end
 
 hold off;
 end

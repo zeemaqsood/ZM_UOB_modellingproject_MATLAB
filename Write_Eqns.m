@@ -16,7 +16,12 @@ if ~exist('Type', 'var')
     Type = 'Plot';
 end
 
-global Vars IVs K eqns constants catalysts n multiples;
+global Vars IVs K eqns constants catalysts n multiples unit K_unit K_units;
+
+units = strings(size(K));
+units(:) = K_unit;
+
+Ks = equiv(K, units, unit, K_units);
 
 % Create a string of all differential equations
 dydt = strings(n, 1);
@@ -31,7 +36,7 @@ for i = 1:m1
     n2 = size(b{2}, 2);
     
     % Define which k value we are working with
-    dum1 = num2str(K(b{3}(1), 1));
+    dum1 = num2str(Ks(b{3}(1), 1));
     
     % Multiply by any variables in the term
     for j = 1:n1
@@ -64,7 +69,7 @@ for i = 1:m1
     end
     
     % Repeat for the reverse reaction
-    dum2 = num2str(K(b{3}(1), 2));
+    dum2 = num2str(Ks(b{3}(1), 2));
     
     for k = 1:n2
         dum2 = strcat(dum2, " * ", Vars(b{2}(k)));
