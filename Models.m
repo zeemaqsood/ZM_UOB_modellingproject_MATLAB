@@ -18,7 +18,7 @@ if isempty(Model_names)
 end
 
 % This will run the necessary model
-eval(strcat("run Models/Model", num2str(model)));
+eval(strcat("run Models\Model", num2str(model)));
 
 if ~exist('Plot', 'var')
     % Create the graph of the variables to visualize the reactions

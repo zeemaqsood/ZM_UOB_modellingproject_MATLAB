@@ -28,5 +28,5 @@ for i = 1:length(eqns)
     end
 end
 
-K_units(K_units == 2) = NaN;
+K_units(K_units == 2) = 0;
 end

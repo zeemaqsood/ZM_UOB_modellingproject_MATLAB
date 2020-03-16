@@ -7,6 +7,7 @@ if iscell(eqns_vars)
     
     for i = 1:length(eqns_vars)
         eqns_nums{i} = vars2nums(eqns_vars{i});
+        % disp(eqns_nums(i));
     end
 else
     
@@ -21,6 +22,7 @@ else
         
         for i = 1:length(eqns_vars)
             eqns_nums(i) = eval(eqns_vars(i));
+            % disp(eqns_nums(i));
         end
         
     elseif ischar(eqns_vars)

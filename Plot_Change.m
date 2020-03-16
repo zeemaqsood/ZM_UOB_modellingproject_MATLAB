@@ -9,7 +9,7 @@ function endpoints = Plot_Change(Type, models, var, Points, groups, varargin)
 %         models: [1, 2]
 %         var: 1
 %         Points: [1,2,3]; [1,10,100]; 10:10:100
-%         groups: [1,2,3]; {[1,2], [3,4]}
+%         groups: [1,2,3]; {[1,2], [3,4]} What we plot
 %         Variable inputs can be either number or the variables you would
 %         like to plot
 %
@@ -27,7 +27,7 @@ function endpoints = Plot_Change(Type, models, var, Points, groups, varargin)
 
 sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
 
-global IVs K Plot_Vars Model_names unit T_unit K_units;
+global IVs K Plot_Vars Model_names unit T_unit K_units units_final k_val varz K_un K_unit PlotVars;
 
 h = 1;
 Style = 0;
@@ -36,7 +36,12 @@ T = 0;
 var_unit = unit;
 
 var = vars2nums(var);
+varz = var;
+var_sign = var;
 groups = vars2nums(groups);
+
+
+
 
 % Check the options
 while h <= length(varargin)
@@ -59,13 +64,14 @@ while h <= length(varargin)
         
     % If there is an option "Proportion", let Style be set to 1
     elseif varargin{h} == "Proportion"
+        
         Style = 1;
         h = h + 1;
         
     % If there is an option "Count", let Style be set to 2, and let the
     % next input be the variable we will be counting
     elseif varargin{h} == "Count"
-        Count = varargin{h + 1};
+        Count = vars2nums(varargin{h + 1});
         Style = 2;
         h = h + 2;
         
@@ -118,14 +124,38 @@ end
 m = length(groups);
 n = length(Points);
 
+
+
 % Let Groups be the names of the variables in each group
 Groups = strings(m, 1);
 for i = 1:m
     Groups(i) = Plot_Vars(groups{i}(1));
-    
+        simplegroupname = Groups(i); 
+        simplegroupname2 = strsplit(simplegroupname, {'^', '{', '}'});
+        simplegroupname3 = {1, length(simplegroupname2)};
+        for z = 1:length(simplegroupname2)
+            if isstrprop(simplegroupname2(z),'alpha')
+            simplegroupname3{1, z} = simplegroupname2(z);
+%             simplegroupname4 = strcat(simplegroupname4, simplegroupname3{1, z});
+            elseif isstrprop(simplegroupname2(z),'digit')
+                simplegroupname3{1, z} = simplegroupname2(z-1);
+            else
+                
+            end
+           
+        end
+        
+        disp("Daddy");
+        
+
     for j = 2:length(groups{i})
         Groups(i) = strcat(Groups(i), " + ", Plot_Vars(groups{i}(j)));
+        
+        
     end
+%     disp(Groups);
+    
+    
 end
 
 % Set the legend have a space for all plot variables for all steps
@@ -142,6 +172,9 @@ hold on;
 plots = zeros(100, length(groups), length(Points), length(models));
 uns = strings(1, length(groups), length(Points), length(models));
 
+
+% k_val = num2str(b1 * var);
+
 for k = 1:length(models)
     Models(models(k), 'N');
     
@@ -152,11 +185,10 @@ for k = 1:length(models)
             Points_new = equiv(Points, var_unit, unit);
             
         elseif Type == "K"
-            Points_new = equiv(Points, var_unit, unit, K_units);
-            var_unit = varargin{h};
+            Points_new = equiv(Points, var_unit, unit, K_units(var, 0.5 * (3 - b1)));
 
         elseif Type == "KD"
-            K_un = K_units(:, 2) - K_units(:, 1);            
+            K_un = K_units(var, 2) - K_units(var, 1);            
             Points_new = equiv(Points, var_unit, unit, K_un);
         end 
     end
@@ -225,18 +257,53 @@ for k = 1:length(models)
         
         % Set the legend name to the group number plus the changing variable
         % name and its value
-        if Type == "IV"
-            Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ", Groups, ", ", Plot_Vars(var), "^{IV} = ", num2str(v), ", ", unit, "M");
-       
-        elseif Type == "KD"
-            K_un = K_units(Var, 2) - K_units(Var, 1);
-            Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ",Groups, ", k_d = ", num2str(v), ", ", unit, "M^{", num2str(K_un), "}");
+   
         
-        else
-            if K_units(var, 0.5 * (3 - b1)) == 0
-                Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ", Groups, ", k_{", num2str(b1 * var), "} = ", num2str(v), ", ", T_unit, "s^{-1}");
+        if Type == "IV"
+%             Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at [", Plot_Vars(var), "] = ", num2str(v), " ", unit, "M");
+              Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", [", Groups, "] at [", Plot_Vars(var), "] = ", num2str(v), " ", unit, "M");
+       
+         elseif Type == "KD" && K_un == 1 
+             if size(K, 1) > 1 && var_sign < 0
+                  disp("Red");
+                 K_un = K_units(var, 2) - K_units(var, 1);
+                   Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", [", Groups, "] at k_-_", num2str(var), " = ", num2str(v), " ", unit, "M");
+%                   Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat("[LLRR] at k_-_", num2str(var), " = ", num2str(v), " ", K_unit, "M");
+%                 Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at k_d_(_-_",num2str(var), "_)", num2str(v), " ", unit, "M");
+             
+             elseif size(K, 1) > 1 && var_sign > 0
+                  
+                 K_un = K_units(var, 2) - K_units(var, 1);
+                 Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat("[LLRR] at k_", num2str(var), " = ", num2str(v), " ", K_unit, "M"); 
+%                  Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at k_d_(_",num2str(var), "_)", num2str(v), " ", unit, "M");
+             else
+                 
+                K_un = K_units(var, 2) - K_units(var, 1);
+                Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at k_d ", num2str(v), " ", unit, "M");
+             end
+        elseif Type == "KD" && K_un > 1
+            if length(K) > 1 && var_sign < 0
+                 disp("Red > 1 ");
+                K_un = K_units(var, 2) - K_units(var, 1);
+%                 Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at k_d_(_-_", num2str(var), "_) = ", num2str(v), " ", unit, "M^{", num2str(K_un), "}");
+                Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", [", Groups, "] at k_d_(_-_", num2str(var), "_) = ", num2str(v), " ", unit, "M^{", num2str(K_un), "}");                
+            
+            elseif length(K) > 1 && var_sign > 0                 disp("Yellow > 1");
+                K_un = K_units(var, 2) - K_units(var, 1);
+%                 Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at k_d_(_", num2str(var), "_) = ", num2str(v), " ", unit, "M^{", num2str(K_un), "}");
+                Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat("[", Groups, "] at k_d_(_", num2str(var), "_) = ", num2str(v), " ", unit, "M^{", num2str(K_un), "}");
             else
-                Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", ", Groups, ", k_{", num2str(b1 * var), "} = ", num2str(v), ", ", unit, "M^{", num2str(K_units(var, 0.5 * (3 - b1))), "}", T_unit, "s^{-1}");
+                 disp("Blue > 1");
+                K_un = K_units(var, 2) - K_units(var, 1);
+                Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at k_d = ", num2str(v), " ", unit, "M^{", num2str(K_un), "}");
+            end
+        else
+            disp("blah blah");
+            if K_units(var, 0.5 * (3 - b1)) == 0
+%                 Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", [", Groups, "] at k_{", num2str(b1 * var), "} = ", num2str(v), " ", T_unit, "s^{-1}");
+                  Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at k_{", num2str(b1 * var), "} = ", num2str(v), " ", T_unit, "s^{-1}");
+            else
+                Legend((k - 1) * m * n + (i - 1) * m + 1:(k - 1) * m * n + i * m) = strcat(Model_names(models(k)), ", \theta_b at k_{", num2str(b1 * var), "} = ", num2str(v), " ", unit, "M^{", num2str(K_units(var, 0.5 * (3 - b1))), "}", T_unit, "s^{-1}");
             end
         end
         
@@ -251,26 +318,48 @@ if Style == 0
 
     v = max(max(plots(:, 2:end, :).* 10 .^ (3 * (b - 9))));
     
-    m = min(v(:));
+    m = min(v(v ~= 0));
 
     Log = floor(log10(m)/3);
+    
+    if isempty(Log)
+        [~, b] = ismember(unit, sizes);
+        Log = b - 9;
+    end
     
     units = sizes(9 + Log);
     
     plots(:, 2:end, :, :) = equiv(plots(:, 2:end, :, :), uns, units);
+    
 end
 
 for k = 1:length(models)
+    
     for i = 1:n
-        plot(plots(:, 1, i, k), plots(:, 2:end, i, k));
+            plot(plots(:, 1, i, k), plots(:, 2:end, i, k), 'LineWidth',5);
+            set(gcf,'Position',[500 200 1000 700]);
+             set(gca,  'FontSize', 20);
+            
     end
 end
 
 % Add the legend and label the axis
 legend(Legend);
-xlabel(strcat("Time, ", T_unit, "s"));
-ylabel(strcat("Concentration, ", units, "M"));
-% title(Model_names(models));
+xlabel(strcat("Time, ", T_unit, "s"), 'FontSize',30);
+
+
+if Style == 0
+    units_final = units;
+    ylabel(strcat("Concentration ", units_final, "M"), 'FontSize',20);
+elseif Style == 1
+%       ylabel(strcat("Fraction of [", Groups, "]"), 'FontSize',20);
+%         ylabel('\theta_b', 'FontSize', 14);
+        ylabel(strcat("Fraction of species"), 'FontSize',30);
+else
+    ylabel('\theta_b', 'FontSize',20);
+  
+end
+title(Model_names(models));
 
 % Allow no more lines to be added to the plot
 hold off;

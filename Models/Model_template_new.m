@@ -1,21 +1,26 @@
 function Model_template_new
 
-global Model_names Vars Plot_Vars IVs units K K_units T_units eqns multiples catalysts constants n;
+global Model_names Vars Plot_Vars IVs unit K K_units K_unit eqns multiples catalysts constants n;
 
 Model_names() = "";
 
 % Number of variables
 n = ;
 
+%Creating row matrices, with the number of columns beiong dependent on the
+%number of species involved in the model
+
 Vars = cell(n, 1);
 IVs = zeros(n, 1);
+unit = "n";
+
 Var_unit = strings(n, 1);
 
 % Variable names and their initial values
 Vars{1} = ;        IVs(1) = ;      Var_unit(1) = ""; % 'L', 1, any of the following ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"]
 Vars{2} = ;        IVs(2) = ;      Var_unit(2) = "";
 
-[IVs, units] = equiv(IVs, Var_unit);
+IVs = equiv(IVs, Var_unit, unit);
 
 % Formal variable names displayed when used to plot graphs. If you would
 % like to change any, do so here
@@ -31,16 +36,17 @@ eqns = cell(1, 1);
 %            in           out     k value numbers
 eqns{1} = {, , }; % {["R", "LL_R"], "LL_RR", 2}
 
+% convert character or string array to numbers
 eqns = vars2nums(eqns);
 
 % Define the K values. If no reverse reaction occurs, set the second value
 % to zero
 
 K = zeros(, 2);
-K_unit = strings(, 1);
+K_unit = "";
 T_unit = "";
 
-K(1, :) = [, ];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"]
+K(1, :) = [, ]; % [0.1, 0.1]
   
 
 % Reactions which have multiple possibilities
@@ -65,7 +71,7 @@ catalysts{2} = cell(, 1);
 
 catalysts{2} = vars2nums(catalysts{2});
 
-[K_units, T_units] = K_Var_units(units, K_unit, T_unit);
+K_units = K_Var_units;
 
 % Variables which we assume to stay constant
 constants = vars2nums(); % [1, 2]

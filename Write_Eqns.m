@@ -47,25 +47,31 @@ for i = 1:m1
     if ismember(i, catalysts{1})
         a1 = catalysts{2}(catalysts{1} == i);
         
-        for k = 1:size(a1, 2)
-            a2 = transpose(a1{k});
+        a2 = a1{1};
+
+        dum1a = "";
+
+        dum1a = Vars(a1{1}(1));
+
+        for k1 = 2:size(a1{1}, 2)
+            dum1a = strcat(dum1a, " * ", Vars(a1{1}(k1)));
+        end
             
-            dum1a = "";
+        if size(a1, 1) ~= 1
+            dum1a = strcat("(", dum1a);
             
-            if size(a2, 1) == 1
-                dum1a = Vars(a2);
-            else
-                dum1a = strcat("(", Vars(a2(1)));
-                
-                for k1 = 2:size(a2, 1)
-                    dum1a = strcat(dum1a, " + ", Vars(a2(k1)));
+            for k = 2:size(a1, 1)
+                dum1a = strcat(dum1a, " + ", Vars(a1{k}(1)));
+
+                for k1 = 2:size(a1{k}, 1)
+                    dum1a = strcat(dum1a, " * ", Vars(a1{k}(k1)));
                 end
-                
-                dum1a = strcat(dum1a, ")");
             end
             
-            dum1 = strcat(dum1, " * ", dum1a);
+            dum1a = strcat(dum1a, ")");
         end
+        
+        dum1 = strcat(dum1, " * ", dum1a);
     end
     
     % Repeat for the reverse reaction
@@ -76,28 +82,33 @@ for i = 1:m1
     end
     
     if ismember(- i, catalysts{1})        
-        a1 = catalysts{2}(catalysts{1} == - i);
+        a1 = catalysts{2}(catalysts{1} == -i);
         
-        for k = 1:size(a1, 2)
-            a2 = transpose(a1{k});
+        a2 = a1{1};
+
+        dum2a = "";
+
+        dum2a = Vars(a1{1}(1));
+
+        for k1 = 2:size(a1{1}, 2)
+            dum2a = strcat(dum2a, " * ", Vars(a1{1}(k1)));
+        end
             
-            dum2a = "";
+        if size(a1, 1) ~= 1
+            dum2a = strcat("(", dum2a);
             
-            if size(a2, 1) == 1
-                dum2a = Vars(a2);
-                
-            else
-                dum2a = strcat("(", Vars(a2(1)));
-                
-                for k1 = 2:size(a2, 1)
-                    dum2a = strcat(dum2a, " + ", Vars(a2(k1)));
+            for k = 2:size(a1, 1)
+                dum2a = strcat(dum2a, " + ", Vars(a1{k}(1)));
+
+                for k1 = 2:size(a1{k}, 1)
+                    dum2a = strcat(dum2a, " * ", Vars(a1{k}(k1)));
                 end
-                
-                dum2a = strcat(dum2a, ")");
             end
             
-            dum2 = strcat(dum2, " * ", dum2a);
+            dum2a = strcat(dum2a, ")");
         end
+        
+        dum2 = strcat(dum2, " * ", dum2a);
     end
 
     % Check, in both directions, if the term should be multiplied, as it is

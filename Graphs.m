@@ -40,17 +40,18 @@ end
 figure();
 
 % Plot the graph using the edge labels
-p = plot(G,'EdgeLabel', EdgeLabels, 'ArrowSize', 12, 'Layout', 'layered', 'NodeLabel', {});
+p = plot(G,'EdgeLabel', EdgeLabels, 'LineWidth', 3, 'ArrowSize', 16, 'Layout', 'layered', 'NodeLabel', {});
 
 % Create a list of the formal variable names, followed by blanks
 vars = [Plot_Vars; cell(m - n, 1)];
 for i = n + 1:m
     vars{i} = '';
+    disp(vars{i});
 end
 
 % Add the formal variable names as text to the nodes so I can adjust the
 % type size
-text(p.XData, p.YData, vars, 'FontSize', 10, 'FontWeight', 'Bold');
+text(p.XData, p.YData, vars, 'FontSize', 20, 'FontWeight', 'Bold');
 
 % Remove any dummy nodes, nodes which are not variables
 highlight(p, n + 1:m, 'Marker', 'none');
@@ -59,12 +60,12 @@ highlight(p, n + 1:m, 'Marker', 'none');
 % value is
 for i = 1:size(G.Edges.EndNodes, 1)
 	a = G.Edges.EndNodes(i, :);
-    highlight(p, a, 'EdgeColor', colours(abs(floor(G.Edges.Weight(i)))));
+    highlight(p, a, 'MarkerSize', 10, 'EdgeColor', colours(abs(floor(G.Edges.Weight(i)))));
 end
 
 % Create any multiple likely edges thicker
 if ~isempty(thick_edges)
-    highlight(p, thick_edges(:, 1), thick_edges(:, 2), 'LineWidth', 2);
+    highlight(p, thick_edges(:, 1), thick_edges(:, 2), 'LineWidth', 6);
 end
 
 % Create a dotted edge for all edges in dotted edge.

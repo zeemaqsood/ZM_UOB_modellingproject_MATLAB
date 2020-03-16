@@ -15,8 +15,11 @@ global eqns Vars constants;
 n = size(Vars, 1);
 m = size(eqns, 2);
 
-% Let dum be an array of every reaction
+% Let dum be an array of every reaction, having two rows where the top row
+% is for the forward reactions, the bottom row is for the backward reactions
 dum = [1:m; -1:-1:-m];
+%transposing the matrix so that each row has a) forward, b) backward
+%reaction instead of column-wise, as was so previously before transposition
 dum = transpose(dum(:));
 
 i = 1;
@@ -24,8 +27,11 @@ i = 1;
 % Let unused be a cell where each element is the start of every reaction
 unused = cell(2 * m, 2);
 for k = dum
+    %Equation to solve, specified as a symbolic expression or symbolic equation. 
+    %The relation operator == defines symbolic equations. If eqn is a symbolic expression (without the right side), 
+    %the solver assumes that the right side is 0, and solves the equation eqn == 0.
     b = eqns{abs(k)};
-    if k > 0
+    if k > 0 % for forward reaction
         if size(b{1}, 2) >= 2 || (size(b{1}, 2) == 1 && size(b{2}, 2) == 1)
             unused{i, 1} = b{1}(~ismember(b{1}, constants));
             unused{i, 2} = b{2}(~ismember(b{2}, constants));
@@ -33,7 +39,7 @@ for k = dum
             i = i + 1;
         end
         
-    else
+    else % for backward reaction
         if size(b{2}, 2) >= 2 || (size(b{1}, 2) == 1 && size(b{2}, 2) == 1)
             unused{i, 1} = b{2}(~ismember(b{2}, constants));
             unused{i, 2} = b{1}(~ismember(b{1}, constants));

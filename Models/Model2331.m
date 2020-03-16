@@ -2,7 +2,7 @@ function Model2331
 
 global Model_names Vars Plot_Vars IVs K eqns multiples catalysts constants n;
 
-Model_names(2331) = "Model2331";
+Model_names(2331) = "2331";
 
 % Number of variables
 n = 3;

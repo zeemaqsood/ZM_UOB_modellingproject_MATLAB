@@ -1,8 +1,8 @@
-function Model17
+function Model11
 
 global Model_names Vars Plot_Vars IVs K eqns multiples catalysts constants n;
 
-Model_names(11) = "Single L, activate R, mouse";
+Model_names(11) = "Single L, mouse";
 
 n = 3;
 
@@ -11,11 +11,9 @@ IVs = zeros(n, 1);
 K = zeros(1, 2);
 
 % Variable names and their initial values
-Vars{1} = 'L';      IVs(1) = 100; % nM
-Vars{2} = 'R0';      IVs(2) = 6.445 * 10^-3; % nM
-Vars{3} = 'R1';      IVs(3) = 0; % nM
-Vars{4} = 'L_R';    IVs(4) = 0;
-Vars{5} = 'L_R1';    IVs(5) = 0;
+Vars{1} = 'L';      IVs(1) = 1; % nM
+Vars{2} = 'R';      IVs(2) = 6.445 * 10^-3; % nM
+Vars{3} = 'L_R';    IVs(3) = 0;
 
 % Formal variable names displayed when used to plot graphs. If you would
 % like to change any, do so here
@@ -33,10 +31,7 @@ K(1, :) = [10^-3, 10^-2]; % nM^-1s^-1, s^-1
 eqns = cell(1, 1);
 
 %            in           out     k value numbers
-eqns{1} = {["L", "R0"],  "L_R0",  1};
-eqns{1} = {"R0",  "R1",  2};
-eqns{1} = {["L", "R1"],  "L_R1",  3};
-eqns{1} = {"L_R0", "L_R1", 2};
+eqns{1} = {["L", "R"],  "L_R",  1};
 
 eqns = vars2nums(eqns);
     

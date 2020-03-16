@@ -44,67 +44,68 @@ for i = 1:m1
     % If a catalyst is involved in the forward reaction, multiply the term
     % by such catalyst
     if ismember(i, catalysts{1})
+        
         a1 = catalysts{2}(catalysts{1} == i);
         
-        for k = 1:size(a1, 2)
-            a2 = transpose(a1{k});
-            
-            dum1a = "";
-            
-            if size(a2, 1) == 1
-                dum1a = strcat("var(", num2str(a2), ")");
-            else
-                dum1a = strcat("(var(", num2str(a2(1)), ")");
+        a2 = a1{1};
                 
-                for k1 = 2:size(a2, 1)
-                    dum1a = strcat(dum1a, " + var(", num2str(a2(k1)), ")");
+        dum1a = strcat("var(", num2str(a2(1)), ")");
+        
+        for k1 = 2:size(a2, 1)
+            dum1a = strcat(dum1a, " * var(", num2str(a2(k1)), ")");
+        end
+        
+        if size(a1, 1) ~= 1
+            dum1a = strcat("(", dum1a);
+            
+            for k = 2:size(a1, 1)
+                dum1a = strcat(dum1a, " + var(", num2str(a1{k}(1)), ")");
+                
+                for k1 = 2:size(a1{k}, 1)
+                    dum1a = strcat(dum1a, " * var(", num2str(a1{k}(k1)), ")");
                 end
-                
-                dum1a = strcat(dum1a, ")");
             end
             
-            dum1 = strcat(dum1, " * ", dum1a);
+            dum1a = strcat(dum1a, ")");
         end
+        
+        dum1 = strcat(dum1, " * ", dum1a);
     end
-    
+
+
     % Repeat for the reverse reaction
     dum2 = strcat('kval(', num2str(2 * b{3}(1) - 1), ')');
     
     for k = 1:n2
         dum2 = strcat(dum2, " * var(", num2str(b{2}(k)), ')');
     end
-    
-    if ismember(- i, catalysts{1})
-        a = catalysts{2}(catalysts{1} == - i);
         
-        for k = 1:size(a, 1)
-            dum2 = strcat(dum2, " * var(", num2str(a(k)), ")");
+    if ismember(-i, catalysts{1})        
+        a1 = catalysts{2}(catalysts{1} == -i);
+        
+        a2 = a1{1};
+                
+        dum2a = strcat("var(", num2str(a2(1)), ")");
+        
+        for k1 = 2:size(a2, 1)
+            dum2a = strcat(dum2a, " * var(", num2str(a2(k1)), ")");
         end
-    end
-    
-    if ismember(- i, catalysts{1})        
-        a1 = catalysts{2}(catalysts{1} == - i);
         
-        for k = 1:size(a1, 2)
-            a2 = transpose(a1{k});
+        if size(a1, 1) ~= 1
+            dum2a = strcat("(", dum2a);
             
-            dum2a = "";
-            
-            if size(a2, 1) == 1
-                dum2a = strcat("var(", num2str(a2), ")");
+            for k = 2:size(a1, 1)
+                dum2a = strcat(dum2a, " + var(", num2str(a1{k}(1)), ")");
                 
-            else
-                dum2a = strcat("(var(", num2str(a2(1)), ")");
-                
-                for k1 = 2:size(a2, 1)
-                    dum2a = strcat(dum2a, " + var(", num2str(a2(k1)), ")");
+                for k1 = 2:size(a1{k}, 1)
+                    dum2a = strcat(dum2a, " * var(", num2str(a1{k}(k1)), ")");
                 end
-                
-                dum2a = strcat(dum2a, ")");
             end
             
-            dum2 = strcat(dum2, " * ", dum2a);
+            dum2a = strcat(dum2a, ")");
         end
+        
+        dum2 = strcat(dum2, " * ", dum2a);
     end
     
     % Check, in both directions, if the term should be multiplied, as it is
@@ -140,6 +141,7 @@ end
 var = sym('var', [n, 1]);
 IV = sym('IV', [n, 1]);
 kval = sym('kval', [2 * size(K, 1), 1]);
+dydt(dydt == "") = "0 * var(1)";
 
 % Convert all differential equations to latex form and put them equal to
 % d(var)/dt in latex form.

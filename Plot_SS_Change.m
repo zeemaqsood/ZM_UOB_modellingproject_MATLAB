@@ -1,8 +1,17 @@
 function SS = Plot_SS_Change(Type, models, var, Points, groups, varargin)
 
+% Plot_SS_Change:
+%
+% This function will plot the Steady states of groups for eac of the 
+% models, when the var of Type is being changed to Points. 
+%
+% See also: Steady_States, Models
+%
+% Author: Sean Watson  Date: 06/08/2019  Version: v0.1
+
 sizes = ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"];
 
-global IVs K Vars Plot_Vars Model_names unit K_units T_unit
+global IVs K Vars Plot_Vars Model_names unit K_units T_unit PlotVars
 
 h = 1;
 Style = 0;
@@ -64,15 +73,6 @@ end
 m = length(groups);
 n = length(Points);
 
-% Let Groups be the names of the variables in each group
-Groups = strings(m, 1);
-for i = 1:m
-    Groups(i) = Plot_Vars(groups{i}(1));
-    for j = 2:length(groups{i})
-        Groups(i) = strcat(Groups(i), " + ", Plot_Vars(groups{i}(j)));
-    end
-end
-
 % Set the legend have a space for all plot variables for all steps
 Legend = strings(m * length(models), 1);
 
@@ -85,6 +85,15 @@ uns = strings(1, length(groups), length(models));
 
 for k = 1:length(models)
     Models(models(k), 'N');
+    
+    Groups = strings(m, 1);
+    for ij = 1:m
+        Groups(ij) = Plot_Vars(groups{ij}(1));
+
+        for ji = 2:length(groups{ij})
+            Groups(ij) = strcat(Groups(ij), " + ", Plot_Vars(groups{ij}(ji)));
+        end
+    end
     
     KD = K(:, 2)./K(:, 1);
     
@@ -137,9 +146,20 @@ for k = 1:length(models)
         end
         
         % Set the first column of endpoints to be the changing variable
-        SS(i, 1, k) = v;
+        SS(i, 1, k, :) = v;
         
-        S = Steady_States(false);
+        % Find the steady states for the current model defined
+        S = Steady_States(false, models(k));
+        
+        % If there are more Steady states than found previously i.e. it is
+        % is bi stable or more
+        if size(eval(strcat("S.", Vars{1})), 1) > size(SS, 4)
+            SS(:, :, :, end + 1) = zeros(size(SS(:, :, :, 1)));
+            SS(:, 1, :, end) = SS(:, 1, :, 1);
+            SS(1:i - 1, :, :, end) = NaN;
+            
+            Legend = [Legend, strings(size(Legend(:, 1)))];
+        end
         
         % If a style was specified, change the values to satisfy this
         for j = 1:length(groups)
@@ -166,15 +186,19 @@ for k = 1:length(models)
             end
             
             % Set the endpoints of the lines to the sum of the array endpoints            
-            SS(i, j + 1, k) = sums;
+            SS(i, j + 1, k, :) = sums;
         end
     end
     
     uns(1, :, k) = unit;
     
-    Legend((k - 1) * m + 1:k * m) = strcat(Model_names(models(k)), ", ", Groups);
+    num2str(transpose(1:size(Legend, 2)))
+    
+%     Legend((k - 1) * m + 1:k * m, :) = strcat(Model_names(models(k)), ", ", Groups, ", SS", num2str(transpose(1:size(Legend, 2))));
+    Legend((k - 1) * m + 1:k * m, :) = strcat(Groups);
 end
 
+% If plotting values, change units to best possible
 if Style == 0
     [~, b] = ismember(uns, sizes);
 
@@ -186,34 +210,44 @@ if Style == 0
     
     units = sizes(9 + Log);
     
-    SS(:, 2:end, :) = equiv(SS(:, 2:end, :), uns, units);
+    SS(:, 2:end, :, :) = equiv(SS(:, 2:end, :), uns, units);
 end
 
 for i = 1:length(models)
-    plot(SS(:, 1, i), SS(:, 2:end, i));
+    for j = 1:size(SS, 4)
+        plot(SS(:, 1, i, j), SS(:, 2:end, i, j), 'LineWidth',3);
+        set(gcf,'Position',[500 200 1000 700]);
+        set(gca,  'FontSize', 30);
+    end
 end
 
-legend(Legend);
+legend(Legend, 'FontSize',30);
 
 if ~exist('var_unit', 'var')
     var_unit = unit;
 end
 
 if Type == "IV"
-    xlabel(strcat("Initial value of ", Plot_Vars(var), ", ", var_unit, "M"));
+%     xlabel(strcat("Initial value of ", Plot_Vars(var), ", ", var_unit, "M"));
+      xlabel(strcat("Initial value of ", Plot_Vars(var), ", ", unit, "M"));
     
 elseif Type == "KD"
-    K_uns = K_units(Var, 2) - K_units(Var, 1);
+    K_uns = K_units(var, 2) - K_units(var, 1);
     xlabel(strcat("k_d value, ", var_unit, "M^{", num2str(K_uns), "}"));
     
 else
-    if K_units(Var, 0.5 * (2 - b1)) == 0
-        xlabel(strcat("k_{", num2str(b1 * Var), "} value, ", T_unit, "s^{-1}"));
+    if K_units(var, 0.5 * (2 - b1)) == 0
+        xlabel(strcat("k_{", num2str(b1 * var), "} value, ", T_unit, "s^{-1}"), 'FontSize',30);
     
     else
-        xlabel(strcat("k_{", num2str(b1 * Var), "} value, ", var_unit, "M^{", num2str(K_units(Var, 0.5 * (2 - b1))), "}", T_unit, "s^{-1}"));
+        xlabel(strcat("k_{", num2str(b1 * var), "} value, ", var_unit, "M^{", num2str(K_units(var, 0.5 * (2 - b1))), "}", T_unit, "s^{-1}"), 'FontSize',30);
     end
 end       
 
-ylabel(strcat("Concentration, ", units, "M"));
+if Style == 0
+    ylabel(strcat("Concentration, ", units, "M"), 'FontSize',30);
+else
+    ylabel(strcat("Fraction of Total Concentration"), 'FontSize',30);
+end
+
 end

@@ -2,10 +2,12 @@ function n = how_many_in(var1, vars2)
 
 global Vars eqns;
 
+%If you do not want one of the outputs of a function, then you can replace it with the ~ symbol:
 [group, ~] = Groups(var1);
 
 % Set all variables in Vars to be sym
 for i = 1:size(Vars, 1)
+    %eval(expression,catch_expr) executes expression and, if an error is detected, executes the catch_expr string. 
     eval(strcat(Vars{i},' = sym(Vars{i})', ";"));
 end
 

@@ -141,9 +141,11 @@ for i = 1:size(eqns, 2)
         
         h = h + h1 + h2;
 
-    % If the reaction contain a catakyst, one new node must be created
+    % If the reaction contain a catakyst, one new node(s) must be created
     elseif ismember(i, abs(catalysts{1}))
-        h = h + 1;
+        newnodes = sum(abs(catalysts{1}) == i);
+        
+        h = h + newnodes;
         
         if ismember(i, multiples{1})
             mult1 = true;
@@ -159,12 +161,14 @@ for i = 1:size(eqns, 2)
         
         % If the forward reaction contains a catalyst
         if ismember(i, catalysts{1})
-            edges = [edges; [transpose(b{1}), h * ones(size(b{1}, 2), 1), b{3} * ones(size(b{1}, 2), 1)]; ...
-                            [h * ones(size(b{2}, 2), 1), transpose(b{2}), b{3} * ones(size(b{1}, 2), 1)]];
-                       
-            if mult1
-                thick_edges = [thick_edges; [transpose(b{1}), h * ones(size(b{1}, 2), 1), multiples{2}(multiples{1} == i)]; ...
-                                            [h * ones(size(b{2}, 2), 1), transpose(b{2}), multiples{2}(multiples{1} == i)]];
+            for j = 0:newnodes - 1
+                edges = [edges; [transpose(b{1}), (h - j) * ones(size(b{1}, 2), 1), b{3} * ones(size(b{1}, 2), 1)]; ...
+                                [(h - j) * ones(size(b{2}, 2), 1), transpose(b{2}), b{3} * ones(size(b{1}, 2), 1)]];
+
+                if mult1
+                    thick_edges = [thick_edges; [transpose(b{1}), (h - j) * ones(size(b{1}, 2), 1), multiples{2}(multiples{1} == i)]; ...
+                                                [(h - j) * ones(size(b{2}, 2), 1), transpose(b{2}), multiples{2}(multiples{1} == i)]];
+                end
             end
                 
             % Find out which variables are a catalyst
@@ -172,7 +176,7 @@ for i = 1:size(eqns, 2)
             
             h1 = 0;
             
-            for j = 1:size(a1, 2)
+            for j = 1:size(a1, 1)
                 a2 = transpose(a1{j});
                 
                 % Add the edges from the first node to the middle node, the
@@ -182,22 +186,22 @@ for i = 1:size(eqns, 2)
                     h1 = h1 + 1;
                     
                     edges = [edges; [a2, (h + h1) * ones(size(a2, 1), 1), b{3} * ones(size(a2, 1), 1)]; ...
-                                    [h + h1, h, b{3}]];
+                                    [h + h1, h - j + 1, b{3}]];
 
                     % Add the edges from the catalysts to the middle node
                     dotted_edges = [dotted_edges; [a2, (h + h1) * ones(size(a2, 1), 1)]; ...
-                                                  [h + h1, h]];
+                                                  [h + h1, h - j + 1]];
                                               
                     if mult1     
                         thick_edges = [thick_edges; [a2, (h + h1) * ones(size(a2, 1), 1), multiples{2}(multiples{1} == i) * ones(size(a2, 1), 1)]; ...
-                                                    [h + h1, h, multiples{2}(multiples{1} == i)]];
+                                                    [h + h1, h - j + 1, multiples{2}(multiples{1} == i)]];
                     end
                     
                 else
-                    edges = [edges; [a2, h, b{3}]];
+                    edges = [edges; [a2, h - j + 1, b{3}]];
 
                     % Add the edges from the catalysts to the middle node
-                    dotted_edges = [dotted_edges; [a2, h]];
+                    dotted_edges = [dotted_edges; [a2, h - j + 1]];
                     
                     if mult1
                         thick_edges = [thick_edges; [a2, h, multiples{2}(multiples{1} == i)]];
@@ -221,40 +225,42 @@ for i = 1:size(eqns, 2)
             
             % Repeat for if the catalyst is involved for the reverse direction
         else
-            edges = [edges; [transpose(b{2}), h * ones(size(b{2}, 2), 1), - b{3} * ones(size(b{1}, 2), 1)]; ...
-                            [h * ones(size(b{1}, 2), 1), transpose(b{1}), - b{3} * ones(size(b{1}, 2), 1)]];
-                        
-            if mult2
-                thick_edges = [thick_edges; [transpose(b{2}), h * ones(size(b{2}, 2), 1), multiples{2}(multiples{1} == - i)]; ...
-                                            [h * ones(size(b{1}, 2), 1), transpose(b{1}), multiples{2}(multiples{1} == - i)]];
+            for j = 0:newnodes - 1
+                edges = [edges; [transpose(b{2}), (h - j) * ones(size(b{2}, 2), 1), - b{3} * ones(size(b{1}, 2), 1)]; ...
+                    [(h - j) * ones(size(b{1}, 2), 1), transpose(b{1}), - b{3} * ones(size(b{1}, 2), 1)]];
+                
+                if mult2
+                    thick_edges = [thick_edges; [transpose(b{2}), (h - j) * ones(size(b{2}, 2), 1), multiples{2}(multiples{1} == - i)]; ...
+                        [(h - j) * ones(size(b{1}, 2), 1), transpose(b{1}), multiples{2}(multiples{1} == - i)]];
+                end
             end
             
             a1 = catalysts{2}(catalysts{1} == -i);
             
             h1 = 0;
             
-            for j = 1:size(a1, 2)
+            for j = 1:size(a1, 1)
                 a2 = transpose(a1{j});
                 
                 if size(a2, 1) > 1
                     edges = [edges; [a2, (h + j) * ones(size(a2, 1), 1), - b{3} * ones(size(a2, 1), 1)];
-                                    [h + j, h, - b{3}]];
+                                    [h + j, h - j + 1, - b{3}]];
 
                     dotted_edges = [dotted_edges; [a2, (h + j) * ones(size(a2, 1), 1)];
-                                                  [h + j, h]];
+                                                  [h + j, h - j + 1]];
                                               
                    if mult2
                         thick_edges = [thick_edges; [a2, (h + j) * ones(size(a2, 1), 1), multiples{2}(multiples{1} == - i) * ones(size(a2, 1), 1)];
-                                                    [h + j, h, multiples{2}(multiples{1} == - i)]];
+                                                    [h + j, h - j + 1, multiples{2}(multiples{1} == - i)]];
                    end
                                               
                 else
-                    edges = [edges; [a2, h, - b{3}]];
+                    edges = [edges; [a2, h - j + 1, - b{3}]];
 
-                    dotted_edges = [dotted_edges; [a2, h, - b{3} * ones(size(a2, 1), 1)]];
+                    dotted_edges = [dotted_edges; [a2, h - j + 1]];
                     
                     if mult2
-                        thick_edges = [thick_edges; [a2, h, - b{3} * ones(size(a2, 1), 1), multiples{2}(multiples{1} == - i)]];
+                        thick_edges = [thick_edges; [a2, h - j + 1]];
                     end
                 end
             end
