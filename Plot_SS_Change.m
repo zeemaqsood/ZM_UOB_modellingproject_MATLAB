@@ -221,7 +221,8 @@ for i = 1:length(models)
     end
 end
 
-legend(Legend, 'FontSize',30);
+legend(Legend);
+% legend(Legend, 'FontSize',30);
 
 if ~exist('var_unit', 'var')
     var_unit = unit;

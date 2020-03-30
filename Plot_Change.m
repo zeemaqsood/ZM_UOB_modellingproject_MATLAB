@@ -336,7 +336,8 @@ end
 for k = 1:length(models)
     
     for i = 1:n
-            plot(plots(:, 1, i, k), plots(:, 2:end, i, k), 'LineWidth',5);
+        m = sum(plots(:, 1, i, k) ~= 0) + 1;
+            plot(plots(1:m, 1, i, k), plots(1:m, 2:end, i, k), 'LineWidth',5);
             set(gcf,'Position',[500 200 1000 700]);
              set(gca,  'FontSize', 20);
             

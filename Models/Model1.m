@@ -17,8 +17,8 @@ unit = "";
 Var_unit = strings(n, 1);
 
 % Variable names and their initial values
-Vars{1} = 'LL';          IVs(1) = 100;      Var_unit(1) = ""; % 'L', 1, any of the following ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"]
-Vars{2} = 'R';           IVs(2) = 100;      Var_unit(2) = "";
+Vars{1} = 'LL';          IVs(1) = 10^3;      Var_unit(1) = ""; % 'L', 1, any of the following ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"]
+Vars{2} = 'R';           IVs(2) = 1000;      Var_unit(2) = "";
 Vars{3} = 'LL_R';        IVs(3) = 0;      Var_unit(3) = "";
 
 IVs = equiv(IVs, Var_unit, unit);

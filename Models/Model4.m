@@ -46,8 +46,8 @@ K = zeros(2, 2);
 K_unit = strings(1, 1);
 T_unit = "";
 
-K(1, :) = [5, 0];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"]
-K(2, :) = [0, 0];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"]
+K(1, :) = [0.0001, 1];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"]
+K(2, :) = [1, 0];  K_unit(1) = ""; % [0.1, 0.1], any of the following ["y", "z", "a", "f", "p", "n", "u", "m", "", "K", "M", "G", "T", "P", "E", "Z", "Y"]
   
 
 % Reactions which have multiple possibilities
@@ -75,6 +75,6 @@ catalysts{2} = vars2nums(catalysts{2});
 K_units = K_Var_units;
 
 % Variables which we assume to stay constant
-constants = vars2nums([1]); % [1, 2]
+constants = vars2nums([]); % [1, 2]
     
 end
